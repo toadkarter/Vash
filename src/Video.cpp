@@ -4,9 +4,9 @@
 
 #include "Video.h"
 #include "Frame.h"
-#include <iostream>
 #include <utility>
 #include <array>
+#include <iostream>
 
 Video::Video(const std::filesystem::path& video_path) {
     video_ = cv::VideoCapture(video_path);
@@ -16,9 +16,24 @@ Video::Video(const std::filesystem::path& video_path) {
     double height = video_.get(cv::VideoCaptureProperties::CAP_PROP_FRAME_HEIGHT);
 
     total_pixels_ = (int)(length * width * height);
+
+    GenerateColorFrequencies();
+}
+
+std::map<std::array<int, 3>, double> Video::color_frequencies() {
+    return color_frequencies_;
+}
+
+int Video::total_pixels() const {
+    return total_pixels_;
 }
 
 void Video::GenerateColorFrequencies() {
+    GenerateAllColorFrequencies();
+    DeleteRareColors();
+}
+
+void Video::GenerateAllColorFrequencies() {
     while (video_.isOpened()) {
         cv::Mat current_frame;
         bool frameRead = video_.read(current_frame);
@@ -51,9 +66,7 @@ void Video::UpdateColorFrequencies(Frame frame, int x, int y) {
     }
 }
 
-void Video::GetAllColors() {
-    GenerateColorFrequencies();
-
+void Video::DeleteRareColors() {
     int final_color_count = total_pixels_;
 
     for (auto const& current_color: color_frequencies_) {
@@ -63,29 +76,9 @@ void Video::GetAllColors() {
             color_frequencies_.erase(current_color.first);
         }
     }
-
-    cv::Mat new_mat(5000, 5000, CV_8UC3, cv::Vec3b(0, 0, 0));
-
-    int current_column_counter = 0;
-
-    for (auto const& current_color: color_frequencies_) {
-        double number_of_pixels_to_occupy = current_color.second / final_color_count * 5000;
-        if (number_of_pixels_to_occupy > 1) {
-
-            cv::Vec3b color_to_insert(current_color.first[0], current_color.first[1], current_color.first[2]);
-
-            for (int i = 0; i < (int)number_of_pixels_to_occupy; i++) {
-                for (int j = 0; j < new_mat.rows; j++) {
-                    new_mat.at<cv::Vec3b>(j, current_column_counter + i) = color_to_insert;
-                }
-                current_column_counter++;
-            }
-
-            std::cout << current_column_counter << std::endl;
-        }
-    }
-    std::cout << "Saving Pic" << std::endl;
-    cv::imwrite("pic.png", new_mat);
+    total_pixels_ = final_color_count;
 }
+
+
 
 

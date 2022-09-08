@@ -14,6 +14,6 @@ link_directories(${Boost_LIBRARY_DIR})
 
 add_library(frame src/Frame.cpp)
 
-add_executable(main src/main.cpp src/Frame.cpp include/Frame.h src/Video.cpp include/Video.h)
+add_executable(main src/Main.cpp src/Frame.cpp include/Frame.h src/Video.cpp include/Video.h src/Mosaic.cpp include/Mosaic.h)
 
 target_link_libraries(main frame ${OpenCV_LIBS} ${Boost_LIBRARIES})

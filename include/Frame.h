@@ -14,6 +14,7 @@ public:
     explicit Frame(cv::Mat frame);
     cv::Mat pixels();
     std::array<int, 3> GetColorAtPixel(int x, int y);
+
 private:
     cv::Mat ReduceColors(cv::Mat frame);
     cv::Mat pixels_;
